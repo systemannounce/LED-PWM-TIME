@@ -1,0 +1,318 @@
+C51 COMPILER V9.60.0.0   MAIN1                                                             04/05/2023 16:32:51 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN1
+OBJECT MODULE PLACED IN .\Objects\main1.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main1.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\mai
+                    -n1.lst) TABS(2) OBJECT(.\Objects\main1.obj)
+
+line level    source
+
+   1          #include <REGX51.H>
+   2          #define uint unsigned int
+   3          #define uchar unsigned char
+   4          #define delaytime 10 // 延迟时间
+   5          #include <intrins.h>
+   6          
+   7          sbit Buzzer=P2^5;
+   8          
+   9          unsigned char PWM_COUNT; // 计数
+  10          unsigned int HUXI_COUNT; // 占空比更新时间
+  11          unsigned char PWM_VLAUE; // 占空比比对值
+  12          bit direc_flag; // 占空比更新方向
+  13          // 管脚定义
+  14          // sbit P2_0 = P2 ^ 0;
+  15          // sbit P2_1 = P2 ^ 1;
+  16          // sbit P2_2 = P2 ^ 2;
+  17          // sbit P2_3 = P2 ^ 3;
+  18          // sbit P2_4 = P2 ^ 4;
+  19          // sbit P2_5 = P2 ^ 5;
+  20          // sbit P2_6 = P2 ^ 6;
+  21          // sbit P2_7 = P2 ^ 7;
+  22          
+  23          uint t = 1 , i = 0 , keycount = 0 , keycurrent = 0 , ti = 0 , current = 0 ;
+  24          uint LED[8] = {0}; // 8个led
+  25          
+  26          // 延迟函数
+  27          void delay_ms(unsigned int a)
+  28          {
+  29   1          unsigned int b;
+  30   1          while (a-- != 0)for (b = 0; b < 600; b++);
+  31   1      
+  32   1      }
+  33          void delay(uint s)
+  34          {
+  35   1          while(s--);
+  36   1      }
+  37          // 定时，1ms
+  38          
+  39          void i0_server_(void) interrupt 1
+  40          {
+  41   1          TH0 = 0xFC;
+  42   1          TL0 = 0x18;
+  43   1          if(keycurrent ==4)
+  44   1          {
+  45   2          if (t >= 9)t = 1;
+  46   2          else t++;
+  47   2      
+  48   2          if (t > LED[0]) // LED0 亮度
+  49   2              P2_0 = 1;
+  50   2          else
+  51   2              P2_0 = 0;
+  52   2      
+  53   2          if (t > LED[1]) // LED1 亮度
+  54   2              P2_1 = 1;
+C51 COMPILER V9.60.0.0   MAIN1                                                             04/05/2023 16:32:51 PAGE 2   
+
+  55   2          else
+  56   2              P2_1 = 0;
+  57   2      
+  58   2          if (t > LED[2]) // LED2 亮度
+  59   2              P2_2 = 1;
+  60   2          else
+  61   2              P2_2 = 0;
+  62   2      
+  63   2          if (t > LED[3]) // LED3 亮度
+  64   2              P2_3 = 1;
+  65   2          else
+  66   2              P2_3 = 0;
+  67   2      
+  68   2          if (t > LED[4]) // LED4 亮度
+  69   2              P2_4 = 1;
+  70   2          else
+  71   2              P2_4 = 0;
+  72   2      
+  73   2          if (t > LED[5]) // LED5 亮度
+  74   2              P2_5 = 1;
+  75   2          else
+  76   2              P2_5 = 0;
+  77   2      
+  78   2          if (t > LED[6]) // LED6 亮度
+  79   2              P2_6 = 1;
+  80   2          else
+  81   2              P2_6 = 0;
+  82   2      
+  83   2          if (t > LED[7]) // LED7 亮度
+  84   2              P2_7 = 1;
+  85   2          else
+  86   2              P2_7 = 0;
+  87   2          }
+  88   1          if(keycount != 0)
+  89   1          {
+  90   2          ti++;
+  91   2          if(ti > 60000)ti=0;
+  92   2          }
+  93   1      
+  94   1      
+  95   1              if(keycurrent ==3)
+  96   1          {
+  97   2        PWM_COUNT++;
+  98   2        HUXI_COUNT++;
+  99   2        if(PWM_COUNT == PWM_VLAUE) // 判断是否到了点亮LED的时候
+ 100   2          P2 = 0xfe; // 点亮LED
+ 101   2      
+ 102   2        if(PWM_COUNT == 10) // 当前周期结束
+ 103   2        {
+ 104   3          P2 = 0xff; // 熄灭LED
+ 105   3          PWM_COUNT = 0;
+ 106   3          } // 重新计时 
+ 107   2      
+ 108   2          if((HUXI_COUNT == 60) && (direc_flag == 0))
+ 109   2          { // 占空比增加10%
+ 110   3            HUXI_COUNT = 0;
+ 111   3            PWM_VLAUE++;
+ 112   3            if(PWM_VLAUE == 9) // 占空比更改方向
+ 113   3                      direc_flag = 1;
+ 114   3          }
+ 115   2      
+ 116   2          if((HUXI_COUNT == 60) && (direc_flag == 1))
+C51 COMPILER V9.60.0.0   MAIN1                                                             04/05/2023 16:32:51 PAGE 3   
+
+ 117   2      
+ 118   2          { // 占空比减少10%
+ 119   3            HUXI_COUNT = 0;
+ 120   3            PWM_VLAUE--;
+ 121   3            if(PWM_VLAUE == 1) // 占空比更改方向
+ 122   3              direc_flag = 0;
+ 123   3          } }
+ 124   1      
+ 125   1      }
+ 126          
+ 127          void Init_t0(void) // 定时器初始化
+ 128          {
+ 129   1          TMOD = 0x01; // 选择方式1
+ 130   1          TH0 = 0xFC;
+ 131   1          TL0 = 0x18; // 1ms
+ 132   1          EA = 1;
+ 133   1          ET0 = 1;
+ 134   1          TR0 = 1; // 开始计数
+ 135   1      }
+ 136          
+ 137          
+ 138          
+ 139          
+ 140          
+ 141          
+ 142          // void Timer0_Routine() interrupt 3
+ 143          // {
+ 144          
+ 145          // }
+ 146          
+ 147          
+ 148          // void Init_t1(void)
+ 149          // {
+ 150          //  TMOD =0x01;
+ 151          //  TH1 = 0x47; // 定时器溢出值设置，每隔200us发起一次中断。
+ 152          //  TL1 = 0X47;
+ 153          //  TR1 = 1; // 定时器0开始计时
+ 154          //  ET1 = 1; // 开定时器0中断
+ 155          //  EA = 1; // 开总中断
+ 156          //  PWM_COUNT = 0;
+ 157          // }
+ 158          
+ 159          
+ 160          void Buzzer_Delay500us()    //@12.000MHz
+ 161          {
+ 162   1        unsigned char i;
+ 163   1      
+ 164   1        _nop_();
+ 165   1        i = 247;
+ 166   1        while (--i);
+ 167   1      }
+ 168          
+ 169          /**
+ 170            * @brief  蜂鸣器发声
+ 171            * @param  ms 发声的时长，范围：0~32767
+ 172            * @retval 无
+ 173            */
+ 174          void Buzzer_Time(unsigned int ms)
+ 175          {
+ 176   1        unsigned int i;
+ 177   1        for(i=0;i<ms*2;i++)
+ 178   1        {
+C51 COMPILER V9.60.0.0   MAIN1                                                             04/05/2023 16:32:51 PAGE 4   
+
+ 179   2          Buzzer=!Buzzer;
+ 180   2          Buzzer_Delay500us();
+ 181   2        }
+ 182   1      }
+ 183          
+ 184          
+ 185          void main()
+ 186          {
+ 187   1          uint et = 1;
+ 188   1          // LED[7] = 10;
+ 189   1          Init_t0();
+ 190   1          // Init_t1();
+ 191   1          // for (i = 0; i < 8; i++)LED[i] = i;
+ 192   1      
+ 193   1      
+ 194   1            HUXI_COUNT = 0;
+ 195   1          PWM_COUNT = 0;
+ 196   1          PWM_VLAUE = 5;
+ 197   1          direc_flag = 0;
+ 198   1          P2 = 0xff; // 默认LED熄灭
+ 199   1           // 定时器0初始化
+ 200   1      
+ 201   1          while (1)
+ 202   1          {
+ 203   2      
+ 204   2      
+ 205   2      
+ 206   2      
+ 207   2      
+ 208   2              while (P3_1 == 0)
+ 209   2              {
+ 210   3                  keycurrent =0;
+ 211   3                  delay_ms(delaytime);
+ 212   3                  if (keycount == 2 && et == 1){keycount = 3;et = 0;Buzzer_Time(100);}
+ 213   3                  if (keycount == 1 && et == 1){keycount = 2;et = 0;Buzzer_Time(100);}
+ 214   3                  if (keycount == 0 && et == 1){keycount = 1;et = 0;Buzzer_Time(100);}
+ 215   3                  if (ti > 1000){keycurrent = 4;et = 0;keycount = 0;Buzzer_Time(100);}
+ 216   3              }
+ 217   2      
+ 218   2              et = 1;
+ 219   2      
+ 220   2              if(ti >1000)
+ 221   2              {
+ 222   3                  if(keycurrent != 4)keycurrent = keycount;
+ 223   3                  keycount = 0;
+ 224   3                  ti = 0;
+ 225   3              }
+ 226   2              if(keycurrent == 1)
+ 227   2              {
+ 228   3                  current++;
+ 229   3                  if(current <5000)P2 = 0x00;
+ 230   3                  if(current >10000)
+ 231   3                  {
+ 232   4                      P2 = 0xFF;
+ 233   4                      if(current >15000)current = 0;
+ 234   4                  }
+ 235   3              }
+ 236   2              if(keycurrent == 2)
+ 237   2              {
+ 238   3                  current++;
+ 239   3                  if(current <1000)P2 =~0x01;
+ 240   3                  if(current >1000 && current <2000)P2 = ~0x02;
+C51 COMPILER V9.60.0.0   MAIN1                                                             04/05/2023 16:32:51 PAGE 5   
+
+ 241   3                  if(current >2000 && current <3000)P2 = ~0x04;
+ 242   3                  if(current >3000 && current <4000)P2 = ~0x08;
+ 243   3                  if(current >4000 && current <5000)P2 = ~0x10;
+ 244   3                  if(current >5000 && current <6000)P2 = ~0x20;
+ 245   3                  if(current >6000 && current <7000)P2 = ~0x40;
+ 246   3                  if(current >7000 && current <8000)P2 = ~0x80;
+ 247   3                  if(current >8000)current =0;
+ 248   3              }
+ 249   2              if(keycurrent == 3)
+ 250   2              {
+ 251   3      
+ 252   3              }
+ 253   2      
+ 254   2              if(keycurrent == 4)
+ 255   2              {
+ 256   3                  LED[0] = 10;
+ 257   3                  delay_ms(delaytime);
+ 258   3                  LED[1] = 10;
+ 259   3                  LED[0] = 6;
+ 260   3                  delay_ms(delaytime);
+ 261   3                  LED[2] = 10;
+ 262   3                  LED[1] = 6;
+ 263   3                  LED[0] = 2;
+ 264   3                  for (i = 0; i < 5; i++)
+ 265   3                  {
+ 266   4                      LED[i] = 0;
+ 267   4                      LED[i + 1] = 2;
+ 268   4                      LED[i + 2] = 6;
+ 269   4                      LED[i + 3] = 10;
+ 270   4                      delay_ms(delaytime);
+ 271   4                  }
+ 272   3                  LED[5] = 0;
+ 273   3                  LED[6] = 2;
+ 274   3                  LED[7] = 6;
+ 275   3                  delay_ms(delaytime);
+ 276   3                  LED[6] = 0;
+ 277   3                  LED[7] = 2;
+ 278   3                  delay_ms(delaytime);
+ 279   3                  LED[7] = 0;
+ 280   3                  delay_ms(delaytime);
+ 281   3              }
+ 282   2      
+ 283   2      
+ 284   2      
+ 285   2          }
+ 286   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1096    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     32    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,158 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              04/04/2023 21:59:26 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX51.H>
+   2          #define uint unsigned int
+   3          #define uchar unsigned char
+   4          #define delaytime 10 // 延迟时间
+   5          
+   6          // 管脚定义
+   7          // sbit P2_0 = P2 ^ 0;
+   8          // sbit P2_1 = P2 ^ 1;
+   9          // sbit P2_2 = P2 ^ 2;
+  10          // sbit P2_3 = P2 ^ 3;
+  11          // sbit P2_4 = P2 ^ 4;
+  12          // sbit P2_5 = P2 ^ 5;
+  13          // sbit P2_6 = P2 ^ 6;
+  14          // sbit P2_7 = P2 ^ 7;
+  15          
+  16          uint t = 1;
+  17          uint LED[8] = {0}; // 8个led
+  18          
+  19          // 延迟函数
+  20          void delay_ms(unsigned int a)
+  21          {
+  22   1          unsigned int i;
+  23   1          while (a-- != 0)for (i = 0; i < 600; i++);
+  24   1      
+  25   1      }
+  26          
+  27          // 定时，1ms
+  28          
+  29          void time0_server_(void) interrupt 1
+  30          {
+  31   1          TH0 = 0xFC;
+  32   1          TL0 = 0x18;
+  33   1      
+  34   1          if (t >= 9)t = 1;
+  35   1          else t++;
+  36   1      
+  37   1          if (t > LED[0]) // LED0 亮度
+  38   1              P2_0 = 1;
+  39   1          else
+  40   1              P2_0 = 0;
+  41   1      
+  42   1          if (t > LED[1]) // LED1 亮度
+  43   1              P2_1 = 1;
+  44   1          else
+  45   1              P2_1 = 0;
+  46   1      
+  47   1          if (t > LED[2]) // LED2 亮度
+  48   1              P2_2 = 1;
+  49   1          else
+  50   1              P2_2 = 0;
+  51   1      
+  52   1          if (t > LED[3]) // LED3 亮度
+  53   1              P2_3 = 1;
+  54   1          else
+C51 COMPILER V9.60.0.0   MAIN                                                              04/04/2023 21:59:26 PAGE 2   
+
+  55   1              P2_3 = 0;
+  56   1      
+  57   1          if (t > LED[4]) // LED4 亮度
+  58   1              P2_4 = 1;
+  59   1          else
+  60   1              P2_4 = 0;
+  61   1      
+  62   1          if (t > LED[5]) // LED5 亮度
+  63   1              P2_5 = 1;
+  64   1          else
+  65   1              P2_5 = 0;
+  66   1      
+  67   1          if (t > LED[6]) // LED6 亮度
+  68   1              P2_6 = 1;
+  69   1          else
+  70   1              P2_6 = 0;
+  71   1      
+  72   1          if (t > LED[7]) // LED7 亮度
+  73   1              P2_7 = 1;
+  74   1          else
+  75   1              P2_7 = 0;
+  76   1      }
+  77          
+  78          void Init_t0(void) // 定时器初始化
+  79          {
+  80   1          TMOD = 0x01; // 选择方式1
+  81   1          TH0 = 0xFC;
+  82   1          TL0 = 0x18; // 1ms
+  83   1          EA = 1;
+  84   1          ET0 = 1;
+  85   1          TR0 = 1; // 开始计数
+  86   1      }
+  87          
+  88          void main(void)
+  89          
+  90          {
+  91   1          uint i, j;
+  92   1          LED[7] = 10;
+  93   1          Init_t0();
+  94   1          for (i = 0; i < 8; i++)LED[i] = i;
+  95   1          while (1)
+  96   1          {
+  97   2              LED[0] = 10;
+  98   2              delay_ms(delaytime);
+  99   2              LED[1] = 10;
+ 100   2              LED[0] = 6;
+ 101   2              delay_ms(delaytime);
+ 102   2              LED[2] = 10;
+ 103   2              LED[1] = 6;
+ 104   2              LED[0] = 2;
+ 105   2              for (i = 0; i < 5; i++)
+ 106   2              {
+ 107   3                  LED[i] = 0;
+ 108   3                  LED[i + 1] = 2;
+ 109   3                  LED[i + 2] = 6;
+ 110   3                  LED[i + 3] = 10;
+ 111   3                  delay_ms(delaytime);
+ 112   3              }
+ 113   2              LED[5] = 0;
+ 114   2              LED[6] = 2;
+ 115   2              LED[7] = 6;
+ 116   2              delay_ms(delaytime);
+C51 COMPILER V9.60.0.0   MAIN                                                              04/04/2023 21:59:26 PAGE 3   
+
+ 117   2              LED[6] = 0;
+ 118   2              LED[7] = 2;
+ 119   2              delay_ms(delaytime);
+ 120   2              LED[7] = 0;
+ 121   2              delay_ms(delaytime);
+ 122   2              /*
+ 123   2              for(i = 0;i <8;i++)
+ 124   2              {
+ 125   2              for(j = 0;j < 8;j++) LED[j] = (i+j)%8;
+ 126   2              delay_ms(10);
+ 127   2              }*/
+ 128   2          }
+ 129   1      }
+*** WARNING C280 IN LINE 91 OF main.c: 'j': unreferenced local variable
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    417    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     18       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
