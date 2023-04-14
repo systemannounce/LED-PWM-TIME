@@ -20,7 +20,7 @@ bit direc_flag; // 占空比更新方向
 // sbit P2_6 = P2 ^ 6;
 // sbit P2_7 = P2 ^ 7;
 
-uint t = 1 , i = 0 , keycount = 0 , keycurrent = 0 , ti = 0 , current = 0 ;
+uint t = 1 , i = 0 , keycount = 0 , keycurrent = 0 , ti = 0 , current = 0 ,solar = 0;
 uint LED[8] = {0}; // 8个led
 
 // 延迟函数
@@ -40,6 +40,8 @@ void i0_server_(void) interrupt 1
 {
     TH0 = 0xFC;
     TL0 = 0x18;
+    solar++;
+    if(solar >= 1100)solar =0;
     if(keycurrent ==4)
     {
     if (t >= 9)t = 1;
@@ -247,34 +249,68 @@ void main()
 
         if(keycurrent == 4)
         {
-            LED[0] = 10;
-            delay_ms(delaytime);
+            if(solar <100){LED[0] = 10;LED[7]=0;LED[6]=0;LED[5]=0;LED[4]=0;LED[3]=0;LED[2]=0;LED[1]=0;}
+            else if (solar>=100 && solar <200)
+            {
             LED[1] = 10;
-            LED[0] = 6;
-            delay_ms(delaytime);
+            LED[0] = 6;                
+            }
+            else if (solar>=200 && solar <300)
+            {
             LED[2] = 10;
             LED[1] = 6;
-            LED[0] = 2;
-            for (i = 0; i < 5; i++)
-            {
-                LED[i] = 0;
-                LED[i + 1] = 2;
-                LED[i + 2] = 6;
-                LED[i + 3] = 10;
-                delay_ms(delaytime);
+            LED[0] = 2;                
             }
-            LED[5] = 0;
-            LED[6] = 2;
+            else if (solar>=300 && solar <400)
+            {
+            LED[3] = 10;
+            LED[2] = 6;
+            LED[1] = 2;   
+            LED[0] = 0;
+            }
+            else if (solar>=400 && solar <500)
+            {
+            LED[4] = 10;
+            LED[3] = 6;
+            LED[2] = 2;   
+            LED[1] = 0;
+            }
+            else if (solar>=500 && solar <600)
+            {
+            LED[5] = 10;
+            LED[4] = 6;
+            LED[3] = 2;   
+            LED[2] = 0;
+            }
+            else if (solar>=600 && solar <700)
+            {
+            LED[6] = 10;
+            LED[5] = 6;
+            LED[4] = 2;   
+            LED[3] = 0;
+            }
+            else if (solar>=700 && solar <800)
+            {
+            LED[7] = 10;
+            LED[6] = 6;
+            LED[5] = 2;   
+            LED[4] = 0;
+            }
+            else if (solar>=800 && solar <900)
+            {
             LED[7] = 6;
-            delay_ms(delaytime);
+            LED[6] = 2;
+            LED[5] = 0; 
+            }
+            else if (solar>=900 && solar <1000)
+            {
             LED[6] = 0;
             LED[7] = 2;
-            delay_ms(delaytime);
-            LED[7] = 0;
-            delay_ms(delaytime);
+            }
+            else if (solar>=1000 && solar <1100)
+            {
+            LED[7] = 0;                
+            }
         }
-
-
-
     }
 }
